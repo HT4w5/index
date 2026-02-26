@@ -1,17 +1,20 @@
 package app
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
 	"github.com/HT4w5/index/internal/config"
 	"github.com/HT4w5/index/pkg/index"
+	"github.com/valyala/fasthttp"
 )
 
 type Application struct {
 	cfg config.Config
 
-	index *index.Index
+	index   *index.Index
+	httpsrv *fasthttp.Server
 }
 
 func New(cfg config.Config) *Application {
@@ -58,17 +61,28 @@ func (app *Application) Start() error {
 	}
 
 	// HTTP listen
+	app.httpsrv = &fasthttp.Server{
+		Handler: app.HandleQuery,
+	}
+
+	addr := app.cfg.HTTP.Addr
+	port := app.cfg.HTTP.Port
+	if len(addr) == 0 {
+		addr = "[::]"
+	}
+	if port == 0 {
+		port = 80
+	}
+
+	go app.httpsrv.ListenAndServe(fmt.Sprintf("%s:%d", addr, port))
 
 	return nil
 }
 
 func (app *Application) Shutdown() error {
 	// HTTP shutdown
+	err := app.httpsrv.Shutdown()
 
-	err := app.index.Close()
-	if err != nil {
-		return fmt.Errorf("error shutting down index: %w", err)
-	}
-
-	return nil
+	// Index close
+	return errors.Join(err, app.index.Close())
 }

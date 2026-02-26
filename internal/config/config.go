@@ -21,7 +21,7 @@ type FileSystemConfig struct {
 
 type HTTPConfig struct {
 	Addr string `mapstructure:"addr" validator:"ip"`
-	Port string `mapstructure:"port" validator:"addr"`
+	Port int    `mapstructure:"port" validator:"port"`
 }
 
 type CacheConfig struct {

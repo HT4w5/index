@@ -1,6 +1,7 @@
 package index
 
 import (
+	"net/url"
 	"os"
 
 	"github.com/bytedance/sonic"
@@ -10,7 +11,7 @@ func (i *Index) QueryBytes(path string) ([]byte, bool) {
 	// Lookup cache
 	respBytes, err := i.cache.Get(path)
 	if err == nil {
-		i.logger.Debugf("cache hit for %s")
+		i.logger.Debugf("cache hit for %s", path)
 		return respBytes, true
 	}
 	i.logger.Debugf("cache miss for %s: %v", path, err)
@@ -38,6 +39,12 @@ func (i *Index) QueryBytes(path string) ([]byte, bool) {
 
 func (i *Index) queryFromFS(path string) (Response, bool) {
 	var resp Response
+	path, err := url.JoinPath(i.root, path)
+	if err != nil {
+		i.logger.Errorf("error joining path %s %s", i.root, path)
+		return resp, false
+	}
+
 	info, err := os.Stat(path)
 	if err != nil {
 		if os.IsNotExist(err) {
