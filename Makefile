@@ -1,4 +1,4 @@
-BINARY_NAME=index
+BINARY_NAME=autoindex
 GO_FILES=$(shell find . -name "*.go")
 
 VERSION=$(shell cat .version)
@@ -17,7 +17,7 @@ all: build
 # Build for current native platform
 build:
 	@echo "Building $(BINARY_NAME) for host..."
-	go build -ldflags "$(LDFLAGS_BASE) -X github.com/HT4w5/autoindex/internal/meta.Platform=$(shell go env GOOS)/$(shell go env GOARCH)" -o bin/$(BINARY_NAME) cmd/index/index.go
+	go build -ldflags "$(LDFLAGS_BASE) -X github.com/HT4w5/autoindex/internal/meta.Platform=$(shell go env GOOS)/$(shell go env GOARCH)" -o bin/$(BINARY_NAME) cmd/autoindex/autoindex.go
 
 # Multi-arch build target
 build-all:
@@ -29,7 +29,7 @@ build-all:
 		echo "Building for $$OS/$$ARCH..."; \
 		GOOS=$$OS GOARCH=$$ARCH go build \
 			-ldflags "$(LDFLAGS_BASE) -X github.com/HT4w5/autoindex/internal/meta.Platform=$$OS/$$ARCH" \
-			-o bin/$(BINARY_NAME)-$$OS-$$ARCH$$SUFFIX cmd/index/index.go; \
+			-o bin/$(BINARY_NAME)-$$OS-$$ARCH$$SUFFIX cmd/autoindex/autoindex.go; \
 	)
 
 run: build
