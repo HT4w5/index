@@ -1,0 +1,13 @@
+[log]
+level = "debug"
+
+[filesystem]
+root = "/foo/bar"
+
+[http]
+addr = "127.0.0.1"
+port = 8080
+
+[cache]
+max_size = 1024
+ttl = 60000000000
