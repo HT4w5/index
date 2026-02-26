@@ -21,7 +21,7 @@ func (i *Index) QueryBytes(path string) ([]byte, bool) {
 	i.logger.Debugf("cache miss for %s: %v", path, err)
 
 	// Query filesystem
-	resp, ok := i.queryFromFS(path)
+	resp, ok := i.queryFilesystem(path)
 	if !ok {
 		i.logger.Debugf("not found on filesystem: %s", path)
 		return nil, false
@@ -42,7 +42,7 @@ func (i *Index) QueryBytes(path string) ([]byte, bool) {
 	return respBytes, true
 }
 
-func (i *Index) queryFromFS(path string) (Response, bool) {
+func (i *Index) queryFilesystem(path string) (Response, bool) {
 	var resp Response
 	path, err := url.JoinPath(i.root, path)
 	if err != nil {

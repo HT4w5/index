@@ -9,6 +9,7 @@ import (
 	"github.com/HT4w5/index/internal/config"
 	"github.com/HT4w5/index/pkg/index"
 	"github.com/HT4w5/index/pkg/log"
+	"github.com/docker/go-units"
 	"github.com/valyala/fasthttp"
 )
 
@@ -54,11 +55,15 @@ func (app *Application) Start() error {
 	if app.cfg.Filesystem.Root != "" {
 		opts = append(opts, index.WithRoot(app.cfg.Filesystem.Root))
 	}
-	if app.cfg.Cache.TTL != 0 {
-		opts = append(opts, index.WithTTL(time.Duration(app.cfg.Cache.TTL)))
+	if len(app.cfg.Cache.TTL) != 0 {
+		du, _ := time.ParseDuration(app.cfg.Cache.TTL)
+		opts = append(opts, index.WithTTL(du))
 	}
-	if app.cfg.Cache.MaxSize != 0 {
-		opts = append(opts, index.WithMaxSize(app.cfg.Cache.MaxSize))
+	if len(app.cfg.Cache.MaxSize) != 0 {
+		ms, _ := units.FromHumanSize(app.cfg.Cache.MaxSize)
+		if ms >= units.MB {
+			opts = append(opts, index.WithMaxSize(int(ms/units.MB)))
+		}
 	}
 
 	opts = append(opts, index.WithLogger(app.logger))

@@ -16,22 +16,22 @@ type Config struct {
 }
 
 type FileSystemConfig struct {
-	Root string `mapstructure:"root" validator:"dirpath"`
+	Root string `mapstructure:"root" validate:"dirpath"`
 }
 
 type HTTPConfig struct {
-	Addr string `mapstructure:"addr" validator:"ip"`
-	Port int    `mapstructure:"port" validator:"port"`
+	Addr string `mapstructure:"addr" validate:"ip"`
+	Port uint   `mapstructure:"port" validate:"port"`
 }
 
 type CacheConfig struct {
 	// Max cache size in bytes
-	MaxSize int   `mapstructure:"max_size"`
-	TTL     int64 `mapstructure:"ttl"`
+	MaxSize string `mapstructure:"max_size" validate:"byte_size"`
+	TTL     string `mapstructure:"ttl" validate:"duration"`
 }
 
 type LogConfig struct {
-	Level string `mapstructure:"level" validator:"oneof=debug warn info error none"`
+	Level string `mapstructure:"level" validate:"oneof=debug warn info error none"`
 }
 
 func (cfg *Config) Load() error {
@@ -60,21 +60,13 @@ func (cfg *Config) LoadFromPath(path string) error {
 	return vp.Unmarshal(cfg)
 }
 
-func (cfg *Config) Validate() ([]string, bool) {
+func (cfg *Config) Validate() (validator.ValidationErrors, bool) {
 	validate := validator.New(validator.WithRequiredStructEnabled())
+	validate.RegisterValidation("byte_size", validateByteSize)
+	validate.RegisterValidation("duration", validateDuration)
 	err := validate.Struct(cfg)
 	if err != nil {
-		validationErrors := err.(validator.ValidationErrors)
-		msgs := make([]string, 0, len(validationErrors))
-		for _, e := range validationErrors {
-			msgs = append(msgs, fmt.Sprintf(
-				"Name: %s. Got: %s. Expected: %s. Reason: %s.",
-				e.Field(),
-				e.Value(),
-				e.Param(),
-				e.Tag(),
-			))
-		}
+		return err.(validator.ValidationErrors), false
 	}
 	return nil, true
 }
