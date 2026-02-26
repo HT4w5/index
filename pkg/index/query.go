@@ -3,11 +3,15 @@ package index
 import (
 	"net/url"
 	"os"
+	"strings"
 
 	"github.com/bytedance/sonic"
 )
 
 func (i *Index) QueryBytes(path string) ([]byte, bool) {
+	// Strip trailing slash to avoid duplicate cache
+	path = strings.TrimSuffix(path, "/")
+
 	// Lookup cache
 	respBytes, err := i.cache.Get(path)
 	if err == nil {
@@ -19,6 +23,7 @@ func (i *Index) QueryBytes(path string) ([]byte, bool) {
 	// Query filesystem
 	resp, ok := i.queryFromFS(path)
 	if !ok {
+		i.logger.Debugf("not found on filesystem: %s", path)
 		return nil, false
 	}
 
