@@ -18,7 +18,7 @@ func (i *Index) QueryBytes(path string) ([]byte, bool) {
 		i.logger.Debugf("cache hit for %s", path)
 		return respBytes, true
 	}
-	i.logger.Debugf("cache miss for %s: %v", path, err)
+	i.logger.Debugf("cache miss for %s", path)
 
 	// Query filesystem
 	resp, ok := i.queryFilesystem(path)

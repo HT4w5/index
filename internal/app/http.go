@@ -1,6 +1,8 @@
 package app
 
-import "github.com/valyala/fasthttp"
+import (
+	"github.com/valyala/fasthttp"
+)
 
 const (
 	contentTypeJSON = "application/json"
@@ -11,6 +13,7 @@ var (
 )
 
 func (app *Application) HandleQuery(ctx *fasthttp.RequestCtx) {
+	app.logger.Debugf("incoming request: %s %s", ctx.Method(), ctx.URI().String())
 	resp, ok := app.index.QueryBytes(string(ctx.Path()))
 	if !ok {
 		ctx.SetContentType(contentTypeJSON)
