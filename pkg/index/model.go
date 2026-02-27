@@ -1,8 +1,8 @@
 package index
 
 const (
-	typeFile = "file"
-	typeDir  = "dir"
+	TypeFile = "file"
+	TypeDir  = "dir"
 )
 
 type Response struct {

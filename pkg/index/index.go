@@ -6,6 +6,7 @@ import (
 
 	"github.com/HT4w5/autoindex/pkg/log"
 	"github.com/allegro/bigcache"
+	"github.com/docker/go-units"
 )
 
 type Index struct {
@@ -30,10 +31,12 @@ func New(opts ...func(*Index)) (*Index, error) {
 	}
 	var err error
 	index.cache, err = bigcache.NewBigCache(bigcache.Config{
-		Shards:           1024,
-		LifeWindow:       index.ttl,
-		CleanWindow:      index.ttl,
-		HardMaxCacheSize: index.maxSize,
+		Shards:             1024,
+		LifeWindow:         index.ttl,
+		MaxEntriesInWindow: max(100, index.maxSize*units.MB/(10*units.KB)),
+		MaxEntrySize:       10 * units.KB,
+		CleanWindow:        time.Minute,
+		HardMaxCacheSize:   index.maxSize,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("error creating bigcache: %w", err)
