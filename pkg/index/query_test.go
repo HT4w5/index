@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/HT4w5/autoindex/pkg/log"
 )
@@ -78,6 +79,35 @@ func BenchmarkQueryFilesystem(b *testing.B) {
 
 	for range b.N {
 		_, ok := idx.queryFilesystem("")
+		if !ok {
+			b.Fatal("query failed")
+		}
+	}
+}
+
+func BenchmarkQueryCache(b *testing.B) {
+	var seedBytes [32]byte
+	binary.BigEndian.PutUint64(seedBytes[:], seed)
+	r := rand.New(rand.NewChaCha8(seedBytes))
+	dir := makeBenchmarkDir(b, r, nFiles, nDirs)
+	idx, err := New(
+		WithLogger(&log.DiscardLogger{}),
+		WithRoot(dir),
+		WithTTL(10*time.Minute),
+	)
+	if err != nil {
+		b.Fatalf("failed to create index: %v", err)
+	}
+
+	_, ok := idx.QueryBytes("/")
+	if !ok {
+		b.Fatal("query failed")
+	}
+
+	b.ResetTimer()
+
+	for range b.N {
+		_, ok := idx.QueryBytes("/")
 		if !ok {
 			b.Fatal("query failed")
 		}
