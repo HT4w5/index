@@ -113,11 +113,6 @@ func (i *Index) queryFilesystem(path string) (Response, bool) {
 	entries, err := os.ReadDir(path)
 	if err == nil {
 		// Handle directory
-		if err != nil {
-			i.logger.Errorf("error reading directory %s: %v", path, err)
-			return resp, false
-		}
-
 		resp.Type = TypeDir
 		resp.Contents = make([]Entry, 0, len(entries))
 
@@ -141,6 +136,9 @@ func (i *Index) queryFilesystem(path string) (Response, bool) {
 		}
 		return resp, true
 	}
+
+	i.logger.Debugf("readdir error: %v", err)
+	i.logger.Debugf("retrying as file")
 
 	// Handle file
 	info, err := os.Stat(path)
